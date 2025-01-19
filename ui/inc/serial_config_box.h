@@ -13,20 +13,8 @@
 #include <QGridLayout>
 #include <QDebug>
 
+#include <serial_port_config.h>
 #include <ground_station.h>
-
-// Serial Configuration Struct
-struct 
-{
-  QString                     name;
-  quint32                     baud_rate;
-  QSerialPort::DataBits       data_bits;
-  QSerialPort::Direction      direction;
-  QSerialPort::FlowControl    flow_control;
-  QSerialPort::Parity         parity;
-  QSerialPort::StopBits       stop_bits;
-} typedef serial_config_t;
-
 
 class serial_config_box : public QGroupBox
 {

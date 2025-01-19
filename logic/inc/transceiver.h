@@ -48,10 +48,14 @@ class transceiver : public QObject
     //void stop();
 
   public slots :
+    void configure( config_radio_t* );
     void loop();
+    void enable();
 
   signals :
+    void configured();
     void state_change( transceiver::state_thread );
+
 
   private:
 

@@ -6,6 +6,7 @@
 
 #include <QtWidgets>
 #include <QDialog>
+#include <QDebug>
 
 #include <tab_1.h>
 #include <tab_2.h>
@@ -23,6 +24,8 @@ class main_window : public QDialog
     //void set_radio( std::shared_ptr< transceiver > radio );
 
   private : 
+    void closeEvent( QCloseEvent* event );
+
     std::shared_ptr< ground_station >     p_gs;
     
     std::unique_ptr< QTabWidget >         p_main_widget;

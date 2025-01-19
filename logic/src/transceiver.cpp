@@ -14,13 +14,24 @@ transceiver::transceiver()
   _qerror = QSerialPort::NoError;
 }
 
+void transceiver::config( port_config_t* p_config )
+{
+  p_port->setPortName(    p_config->name ); 
+  p_port->setBaudRate(    p_config->baud_rate, p_config->direction );
+  p_port->setDataBits(    p_config->data_bits );
+  p_port->setFlowControl( p_config->flow_control );
+  p_port->setParity(      p_config->parity );
+  p_port->setStopBits(    p_config->stop_bits );
+  emit configured();
+}
+
 void transceiver::set_port( std::shared_ptr< QSerialPort > port )
 { 
   p_port = port;
   p_rcvr->set_port( port ); 
 } 
 
-void transceiver::start()
+void transceiver::enable()
 { _enable = true; }
 
 void transceiver::stop()

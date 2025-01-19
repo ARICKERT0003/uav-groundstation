@@ -1,0 +1,14 @@
+**/app/
+**/bin/
+**/build/
+**lib/
+
+*.exe
+*.o
+*.so
+*.a
+*.log
+
+tags
+
+!.gitignore

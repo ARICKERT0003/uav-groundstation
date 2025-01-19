@@ -33,6 +33,11 @@ main_window::main_window( QWidget* parent )
   setWindowTitle( tr("QT App") );
 } 
 
+void main_window::closeEvent(QCloseEvent* event)
+{
+  qDebug() << "Close\n";
+}
+
 //void main_window::init()
 //{ 
 //  p_main_widget->setTabShape( QTabWidget::TabShape::Triangular ); 
