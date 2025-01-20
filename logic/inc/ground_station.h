@@ -8,6 +8,7 @@
 #include <QSerialPort>
 
 #include <transceiver.h>
+#include <thread_radio.h>
 
 class ground_station : public QObject
 {
@@ -16,22 +17,27 @@ class ground_station : public QObject
   public :
     ground_station();
 
-    std::shared_ptr< QSerialPort > get_serial_port();
-    //void set_radio_configured();
+    void set_radio_config( std::shared_ptr< serial_config_t > );
+
     bool is_radio_running();
+    void radio_start();
+    void radio_stop();
 
   public slots :
-    void start_radio();
-    void stop_radio();
+    void set_state_change( std::shared_ptr< state_radio_t > state ); 
+
+  signals :
+    void sig_radio_config( std::shared_ptr< serial_config_t > );
+    void sig_radio_start();
+    void sig_radio_stop();
 
   private :
-    bool  radio_configured;
-    std::shared_ptr< QSerialPort > p_serial_port;
-    std::shared_ptr< transceiver > p_radio;
+    std::shared_ptr< transceiver >      p_radio;
+    std::shared_ptr< serial_config_t >  p_radio_config;
+    std::shared_ptr< state_radio_t >    p_radio_state;
 
     // Thread 
-    // Needs to be qt version of thread to access QSerialPort
-    QThread       _thread_radio;
+    std::unique_ptr< thread_radio >     p_thread_radio;
 };
 
 #endif

@@ -6,12 +6,24 @@
 #include <mutex>
 #include <thread>
 
+#include <QDebug>
 #include <QThread>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
+#include <serial_port_config.h>
 #include <receiver.h>
 #include <switch_timed.h>
+
+typedef struct 
+{
+  bool  configured    : 1;
+  bool  opened        : 1;
+  bool  running       : 1;
+  bool  pending_stop  : 1;
+  bool  error         : 1;
+  bool  not_used      : 3;
+} state_radio_t;
 
 class transceiver : public QObject
 {
@@ -19,23 +31,16 @@ class transceiver : public QObject
 
   public :
 
-    enum state_thread : bool
-    {
-      NRUNNING,
-      RUNNING,
-    };
-
     // Pointer Type
     transceiver();
 
     typedef std::shared_ptr< transceiver > ptr;
+    std::shared_ptr< state_radio_t > get_state();
 
-    void set_port( std::shared_ptr< QSerialPort > port );
-    
-    void start();
-    void stop();
-    bool get_state();
+    // Serial Connection
+    std::shared_ptr< QSerialPort > p_port;
 
+    void loop();
     // Callback
     //typedef bool (*p_rx_callback_t)( const mavlink_message_t&, void*, void*);
     //typedef void (*p_tx_callback_t)( std::shared_ptr< MavlinkQueue > );
@@ -43,26 +48,20 @@ class transceiver : public QObject
     //bool initialize( const std::string&, int, MavlinkQueue::Ptr );
     //void set_rx_callback( p_rx_callback, void*, void* );
     //void set_tx_callback( p_tx_callback );
-    //void message_loop();
-    //void start();
-    //void stop();
 
   public slots :
-    void configure( config_radio_t* );
-    void loop();
-    void enable();
+    void configure( std::shared_ptr< serial_config_t > );
+    void start();
+    void stop();
 
   signals :
-    void configured();
-    void state_change( transceiver::state_thread );
-
+    void state_changed( std::shared_ptr< state_radio_t > );
 
   private:
 
     // Vars
     // =======================
-    // Serial Connection
-    std::shared_ptr< QSerialPort > p_port;
+    std::mutex _mu;
 
     // Timers
     std::shared_ptr< switch_timed > p_timer_rx;
@@ -72,15 +71,9 @@ class transceiver : public QObject
     std::unique_ptr< receiver > p_rcvr;
 
     // State
-    state_thread _state_thread_current;
-    state_thread _state_thread_pending;
-
-    // Thread 
-    // Needs to be qt version of thread to access QSerialPort
-    QThread       _thread;
-    //std::thread  _thread;
+    std::shared_ptr< state_radio_t > p_state;
     
-    bool  _enable;
+    bool  _stop_loop;
 
     // Error
     QSerialPort::SerialPortError _qerror;
@@ -111,6 +104,5 @@ class transceiver : public QObject
     std::thread _transceiverThread;
     */
 };
-
 
 #endif

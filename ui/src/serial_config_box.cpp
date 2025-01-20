@@ -22,8 +22,7 @@ serial_config_box::serial_config_box( std::shared_ptr< ground_station > pgs, QGr
   // Components
   // =========================
   p_gs      = pgs;
-  p_config  = new serial_config_t;
-  p_port    = p_gs->get_serial_port();
+  p_config  = std::make_shared< serial_config_t >();
 
   // UI
   // =========================
@@ -100,7 +99,7 @@ serial_config_box::serial_config_box( std::shared_ptr< ground_station > pgs, QGr
   connect( p_stop_bits_combo_box,     &QComboBox::activated, this, &serial_config_box::set_stop_bits );
 
   // User click button
-  connect( p_apply_btn, &QPushButton::clicked, this, &serial_config_box::config_port ); 
+  connect( p_apply_btn, &QPushButton::clicked, this, &serial_config_box::sanitize ); 
   connect( p_start_stop_btn, &QPushButton::clicked, this, &serial_config_box::on_start_stop_btn ); 
   //connect( p_start_stop_btn, &QPushButton::clicked, (this->p_radio).get(), &transceiver::temp ); 
   //connect( p_start_stop_btn, &QPushButton::clicked, this, &serial_config_box::config_port ); 
@@ -201,25 +200,20 @@ void serial_config_box::set_stop_bits()
   { p_config->stop_bits = QSerialPort::OneStop; }
 }
 
-void serial_config_box::config_port()
+void serial_config_box::sanitize()
 {
   set_name();
   if( p_config->name.isEmpty() )
   { return; } // TODO: red text to show error
     
-  p_port->setPortName(    p_config->name ); 
-  p_port->setBaudRate(    p_config->baud_rate, p_config->direction );
-  p_port->setDataBits(    p_config->data_bits );
-  p_port->setFlowControl( p_config->flow_control );
-  p_port->setParity(      p_config->parity );
-  p_port->setStopBits(    p_config->stop_bits );
+  //qDebug() << "Port Name: " << p_port->portName()     << "\n";
+  //qDebug() << "Baud Rate: " << p_port->baudRate()     << "\n";
+  //qDebug() << "Data Bits: " << p_port->dataBits()     << "\n";
+  //qDebug() << "Flow Ctrl: " << p_port->flowControl()  << "\n";
+  //qDebug() << "Parity: "    << p_port->parity()       << "\n";
+  //qDebug() << "Stop Bits: " << p_port->stopBits()     << "\n";
 
-  qDebug() << "Port Name: " << p_port->portName()     << "\n";
-  qDebug() << "Baud Rate: " << p_port->baudRate()     << "\n";
-  qDebug() << "Data Bits: " << p_port->dataBits()     << "\n";
-  qDebug() << "Flow Ctrl: " << p_port->flowControl()  << "\n";
-  qDebug() << "Parity: "    << p_port->parity()       << "\n";
-  qDebug() << "Stop Bits: " << p_port->stopBits()     << "\n";
+  p_gs->set_radio_config( p_config );
 }
 
 void serial_config_box::on_start_stop_btn()
@@ -227,15 +221,14 @@ void serial_config_box::on_start_stop_btn()
   qDebug() << "Click\n";
   if( p_gs->is_radio_running() )
   {
-    qDebug() << "Running\n";
-    p_gs->stop_radio();
+    qDebug() << "Running, stopping\n";
+    p_gs->radio_stop();
     p_start_stop_btn->setText( tr("Start") );
   }
   else
   {
-    qDebug() << "Not running\n";
-    p_gs->start_radio();
+    qDebug() << "Not running, starting\n";
+    p_gs->radio_start();
     p_start_stop_btn->setText( tr("Stop") );
   }
 }
-

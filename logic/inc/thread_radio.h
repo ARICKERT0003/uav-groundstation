@@ -11,7 +11,7 @@ class thread_radio : public QThread
 
   public :
 
-    thread_radio();
+    thread_radio( std::shared_ptr< transceiver > );
 
   private :
 

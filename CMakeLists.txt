@@ -103,6 +103,7 @@ set(SRC_FILES
   ${LOGIC_DIR}/src/receiver.cpp
   ${LOGIC_DIR}/src/switch_timed.cpp
   ${LOGIC_DIR}/src/ground_station.cpp
+  ${LOGIC_DIR}/src/thread_radio.cpp
   ${UI_DIR}/src/main_window.cpp
   ${UI_DIR}/src/tab_1.cpp
   ${UI_DIR}/src/tab_2.cpp
@@ -117,6 +118,7 @@ set(HEADER_FILES
   ${LOGIC_DIR}/inc/receiver.h
   ${LOGIC_DIR}/inc/switch_timed.h
   ${LOGIC_DIR}/inc/ground_station.h
+  ${LOGIC_DIR}/inc/thread_radio.h
   ${UI_DIR}/inc/main_window.h
   ${UI_DIR}/inc/tab_1.h
   ${UI_DIR}/inc/tab_2.h

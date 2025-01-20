@@ -34,17 +34,15 @@ class serial_config_box : public QGroupBox
     void set_parity();
     void set_stop_bits();
 
-    void config_port();
+    void sanitize();          // On Apply Button
     void on_start_stop_btn();
 
+  signals :
+
   private :
-
-    //struct serial_config_t;
-
     // Components
-    serial_config_t*                  p_config;
-    std::shared_ptr< QSerialPort >    p_port;
-    std::shared_ptr< ground_station > p_gs;
+    std::shared_ptr< serial_config_t >  p_config;
+    std::shared_ptr< ground_station >   p_gs;
 
     // UI 
     QLabel*       p_port_label              = nullptr;
