@@ -24,17 +24,22 @@ class ground_station : public QObject
     void radio_stop();
 
   public slots :
-    void set_state_change( std::shared_ptr< state_radio_t > state ); 
+    void set_state_change( transceiver::ext_state_t ); 
 
   signals :
+    void sig_radio_state_change( transceiver::ext_state_t );
     void sig_radio_config( std::shared_ptr< serial_config_t > );
     void sig_radio_start();
+
+    /**
+     *  @brief This is a stop but not a reset, keep config
+     */
     void sig_radio_stop();
 
   private :
     std::shared_ptr< transceiver >      p_radio;
     std::shared_ptr< serial_config_t >  p_radio_config;
-    std::shared_ptr< state_radio_t >    p_radio_state;
+    transceiver::ext_state_t            radio_state;
 
     // Thread 
     std::unique_ptr< thread_radio >     p_thread_radio;

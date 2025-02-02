@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include <tab_1.h>
+#include <sql_config_box.h>
 #include <tab_2.h>
 #include <tab_3.h>
 
@@ -24,13 +25,16 @@ class main_window : public QDialog
     //void set_radio( std::shared_ptr< transceiver > radio );
 
   private : 
-    void closeEvent( QCloseEvent* event );
 
     std::shared_ptr< ground_station >     p_gs;
     
     std::unique_ptr< QTabWidget >         p_main_widget;
+
     std::shared_ptr< tab_1 >              p_tab1;
     std::shared_ptr< serial_config_box >  p_serial_config_box;
+    std::shared_ptr< sql_config_box >     p_sql_config_box;
+    
+    std::shared_ptr< tab_2 >              p_tab2;
 };
 
 

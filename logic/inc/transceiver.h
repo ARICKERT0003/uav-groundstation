@@ -11,31 +11,42 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 
+#include <mavlink.h>
+
 #include <serial_port_config.h>
 #include <receiver.h>
 #include <switch_timed.h>
 
-typedef struct 
+enum state_loop
 {
-  bool  configured    : 1;
-  bool  opened        : 1;
-  bool  running       : 1;
-  bool  pending_stop  : 1;
-  bool  error         : 1;
-  bool  not_used      : 3;
-} state_radio_t;
+  STATE_LOOP_CREATE, 
+  STATE_LOOP_CONFIGURE,
+  STATE_LOOP_OPEN,
+  STATE_LOOP_RUN 
+};
+typedef uint8_t state_radio_int_t;
 
 class transceiver : public QObject
 {
   Q_OBJECT
 
   public :
+    
+    typedef struct
+    {
+      bool  created       : 1;
+      bool  configured    : 1;
+      bool  opened        : 1;
+      bool  running       : 1;
+      bool  stop          : 1;
+      bool  not_used      : 3;
+    } ext_state_t;
 
     // Pointer Type
     transceiver();
 
     typedef std::shared_ptr< transceiver > ptr;
-    std::shared_ptr< state_radio_t > get_state();
+    ext_state_t get_state();
 
     // Serial Connection
     std::shared_ptr< QSerialPort > p_port;
@@ -49,19 +60,25 @@ class transceiver : public QObject
     //void set_rx_callback( p_rx_callback, void*, void* );
     //void set_tx_callback( p_tx_callback );
 
+    
   public slots :
+    void ready_rx();
     void configure( std::shared_ptr< serial_config_t > );
     void start();
     void stop();
 
   signals :
-    void state_changed( std::shared_ptr< state_radio_t > );
+    void state_changed( ext_state_t );
+    void sig_error( QSerialPort::SerialPortError );
 
   private:
 
+    bool _ready_rx;
+    void reset();
+    void ext_state_reset();
+
     // Vars
     // =======================
-    std::mutex _mu;
 
     // Timers
     std::shared_ptr< switch_timed > p_timer_rx;
@@ -71,9 +88,8 @@ class transceiver : public QObject
     std::unique_ptr< receiver > p_rcvr;
 
     // State
-    std::shared_ptr< state_radio_t > p_state;
-    
-    bool  _stop_loop;
+    ext_state_t radio_ext_state;
+    state_radio_int_t radio_state;
 
     // Error
     QSerialPort::SerialPortError _qerror;

@@ -17,7 +17,7 @@ void receiver::set_port( std::shared_ptr< QSerialPort > pport )
 
 bool receiver::get_messages()
 {
-  while( 25U <= p_port->bytesAvailable() )
+  while( sizeof(mavlink_message_t) <= (size_t)(p_port->bytesAvailable()) )
   {
     //p_port->read( p_rx_buffer, sizeof(mavlink_message_t) ); 
     std::cout << "Received a msg\n";

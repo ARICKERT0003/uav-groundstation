@@ -1,67 +1,75 @@
 cmake_minimum_required(VERSION 3.12)
-project( qt-practice
+project( uav-groundstation
   LANGUAGES CXX
   VERSION   0.0.0
-  DESCRIPTION "QT/QLM Practice"
+  DESCRIPTION "Groundstation for UAVs"
 )
 
 #############################
 # Options
 #############################
-#option(QTPRAC_STATIC_BUILD              "Build static library" OFF)
-#option(QTPRAC_BUILD_EXTERN              "Build extern" OFF)
-#option(QTPRAC_BUILD_SAMPLES             "Build samples" OFF)
-#option(QTPRAC_BUILD_SAMPLE_BRUTE_FORCE  "Build sample" ON)
-#option(QTPRAC_BUILD_SAMPLE_BFS          "Build sample" ON)
-#option(QTPRAC_BUILD_SAMPLE_DFS          "Build sample" ON)
-#option(QTPRAC_BUILD_SAMPLE_GUI          "Build sample" ON)
-#option(QTPRAC_BUILD_SAMPLE_GENETIC      "Build sample" ON)
+#option(UAVGS_STATIC_BUILD              "Build static library" OFF)
+#option(UAVGS_BUILD_EXTERN              "Build extern" OFF)
+#option(UAVGS_BUILD_SAMPLES             "Build samples" OFF)
+#option(UAVGS_BUILD_SAMPLE_BRUTE_FORCE  "Build sample" ON)
+#option(UAVGS_BUILD_SAMPLE_BFS          "Build sample" ON)
+#option(UAVGS_BUILD_SAMPLE_DFS          "Build sample" ON)
+#option(UAVGS_BUILD_SAMPLE_GUI          "Build sample" ON)
+#option(UAVGS_BUILD_SAMPLE_GENETIC      "Build sample" ON)
+
+#option( UAVGS_MAVLINK_MSG_SET
 
 ## Static or Dynamic Link
-#if(QTPRAC_STATIC_BUILD)
+#if(UAVGS_STATIC_BUILD)
 #  set(LINK_TYPE STATIC)
 #else()
 #  set(LINK_TYPE SHARED)
 #endif()
 
+# Mavlink
+if( NOT UAVGS_MAVLINK_DIALECT )
+  set( UAVGS_MAVLINK_DIALECT common )
+endif()
+option( UAVGS_MAVLINK_SILENCE_WARNINGS  "Silence Mavlink Warnings" ON )
+
 #############################
 # Set General Variables 
 #############################
 
-set( APP_NAME qtapp )
+set( APP_NAME uav-groundstation )
 
 # Library Variables
 #set(LIBRARY_NAME qtprac)
 #set(SH_VER 0)
 
 ## Library Output Dir
-#if(NOT QTPRAC_LIBRARY_OUTPUT_DIR)
-#  set( QTPRAC_LIBRARY_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+#if(NOT UAVGS_LIBRARY_OUTPUT_DIR)
+#  set( UAVGS_LIBRARY_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 #endif()
 #
 ## Library Install Dir
-#if(NOT QTPRAC_LIBRARY_INSTALL_DIR)
-#  set( QTPRAC_LIBRARY_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/lib)
+#if(NOT UAVGS_LIBRARY_INSTALL_DIR)
+#  set( UAVGS_LIBRARY_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/lib)
 #endif()
 #
 ## Header Install Dir
-#if(NOT QTPRAC_HEADER_INSTALL_DIR)
-#  set( QTPRAC_HEADER_INSTALL_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/install/inc)
+#if(NOT UAVGS_HEADER_INSTALL_DIR)
+#  set( UAVGS_HEADER_INSTALL_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/install/inc)
 #endif()
 #
 ## Extern Library Output
-#if(NOT QTPRAC_EXTERN_LIBRARY_OUTPUT_DIR)
-#  set( QTPRAC_EXTERN_LIBRARY_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/lib)
+#if(NOT UAVGS_EXTERN_LIBRARY_OUTPUT_DIR)
+#  set( UAVGS_EXTERN_LIBRARY_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/lib)
 #endif()
 #
 ## Extern Library Install
-#if(NOT QTPRAC_EXTERN_LIBRARY_INSTALL_DIR)
-#  set( QTPRAC_EXTERN_LIBRARY_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/lib)
+#if(NOT UAVGS_EXTERN_LIBRARY_INSTALL_DIR)
+#  set( UAVGS_EXTERN_LIBRARY_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/lib)
 #endif()
 #
 ## Extern Header Install
-#if(NOT QTPRAC_EXTERN_HEADER_INSTALL_DIR)
-#  set( QTPRAC_EXTERN_HEADER_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/inc)
+#if(NOT UAVGS_EXTERN_HEADER_INSTALL_DIR)
+#  set( UAVGS_EXTERN_HEADER_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/inc)
 #endif()
 
 #############################
@@ -79,18 +87,12 @@ set( LOGIC_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/logic )
 set( UI_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/ui )
 
 # Base Compiler Flags
-set(QTPRAC_DEBUG_FLAGS 
-  -Wall 
-  -Wextra
-  -Werror
-  -W
-  -DDEBUG
-  -g
-)
+set(UAVGS_COMPILE_FLAGS " -Wall -Wextra -Werror -W -DDEBUG -g" )
 
-set(QTPRAC_RELEASE_FLAGS
-  -pedantic
-  -03
+set(UAVGS_RELEASE_FLAGS
+  "-pedantic"
+  "-03"
+  "-Wno-address-of-packed-member"
 )
 
 #############################
@@ -128,23 +130,19 @@ set(HEADER_FILES
 )
 
 # Include Directory
-set(QTPRAC_INC_DIRS
+set(UAVGS_INC_DIRS
   ${LOGIC_DIR}/inc
   ${UI_DIR}/inc
 )
 
 #############################
-# Set External Files and Directories
+# External Dependencies (Not Included)
 #############################
 # QT
 find_package( Qt6 COMPONENTS Core Gui SerialPort Sql Widgets REQUIRED )
 qt_standard_project_setup( REQUIRES 6.5 )
 
-#list( APPEND QTPRAC_INC_DIRS
-#  ${Boost_INCLUDE_DIRS}
-#)
-
-set(QTPRAC_LIBS 
+set(UAVGS_LIBS 
   Qt6::Core
   Qt6::Gui
   Qt6::SerialPort
@@ -153,16 +151,17 @@ set(QTPRAC_LIBS
 )
 
 #############################
-# Recurse into Directories
+# External Dependencies (Included)
 #############################
-#if(QTPRAC_BUILD_EXTERN)
-#  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/extern)
-#  list(APPEND PROJECT_INC_DIRS
-#)
-#endif()
-#
-## Set all Directories which contain libraries
-#link_directories(${QTPRAC_LIB_DIRS})
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/extern )
+
+LIST( APPEND UAVGS_INC_DIRS
+  ${UAVGS_EXTERN_INC_DIRS}
+)
+
+STRING( APPEND UAVGS_COMPILE_FLAGS
+  ${UAVGS_EXTERN_COMPILE_FLAGS}
+)
 
 #############################
 # Make Target and Set Props
@@ -178,20 +177,21 @@ qt_add_executable( ${APP_NAME} ${SRC_FILES} ${HEADER_FILES} )
 # Make Library Binary
 #add_library( ${LIBRARY_NAME} ${LINK_TYPE} ${SRC_FILES} )
 #
-## Set Library Properties
-#set_target_properties( ${LIBRARY_NAME} PROPERTIES
-#  VERSION ${PROJECT_VERSION}
-#  PUBLIC_HEADER "${HEADER_FILES}"
-#  ARCHIVE_OUTPUT_DIRECTORY "${QTPRAC_LIBRARY_OUTPUT_DIR}"
-#  LIBRARY_OUTPUT_DIRECTORY "${QTPRAC_LIBRARY_OUTPUT_DIR}"
-#)
-#
-## Target Compiler Flags
-#target_compile_options( ${LIBRARY_NAME}
-#  PRIVATE
-#  "$<$<CONFIG:Debug>:${QTPRAC_DEBUG_FLAGS}>"
-#  "$<$<CONFIG:Release>:${QTPRAC_RELEASE_FLAGS}>"
-#)
+# Set Library Properties
+set_target_properties( ${APP_NAME} PROPERTIES
+  VERSION ${PROJECT_VERSION}
+  COMPILE_FLAGS ${UAVGS_COMPILE_FLAGS}
+)
+get_target_property( CHECK ${APP_NAME} COMPILE_FLAGS )
+MESSAGE( "COMPILE FLAGS: " ${CHECK} )
+  #  PUBLIC_HEADER "${HEADER_FILES}"
+  #  ARCHIVE_OUTPUT_DIRECTORY "${UAVGS_LIBRARY_OUTPUT_DIR}"
+  #  LIBRARY_OUTPUT_DIRECTORY "${UAVGS_LIBRARY_OUTPUT_DIR}"
+
+# Target Compiler Flags
+#message( ${UAVGS_DEBUG_FLAGS} )
+#target_compile_options( ${APP_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${UAVGS_DEBUG_FLAGS}>" )
+#target_compile_options( ${APP_NAME} PUBLIC "$<$<CONFIG:RELEASE>:${UAVGS_RELEASE_FLAGS}>" )
 
 #############################
 # Find and Link Libraries
@@ -199,13 +199,13 @@ qt_add_executable( ${APP_NAME} ${SRC_FILES} ${HEADER_FILES} )
 # Target Include Directories
 target_include_directories( ${APP_NAME}
   PUBLIC
-  ${QTPRAC_INC_DIRS}
+  ${UAVGS_INC_DIRS}
 )
 
 # Link External Libraries
 target_link_libraries( ${APP_NAME}
   PUBLIC
-  ${QTPRAC_LIBS}
+  ${UAVGS_LIBS}
 )
 
 #############################
@@ -215,6 +215,6 @@ target_link_libraries( ${APP_NAME}
 #############################
 # Samples
 #############################
-#if(QTPRAC_BUILD_SAMPLES)
+#if(UAVGS_BUILD_SAMPLES)
 #  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 #endif()

@@ -11,71 +11,98 @@ transceiver::transceiver()
 
   //p_transmitter = std::make_shared< transmitter >();
   
-  p_state = std::make_shared< state_radio_t >();
-  p_state->configured   = false;
-  p_state->opened       = false;
-  p_state->running      = false;
-  p_state->error        = false;
+  _ready_rx = false;
+  reset();
+  ext_state_reset();
 
-  _stop_loop = false;
-  
-  _qerror = QSerialPort::NoError;
+  //connect( p_port.get(), &QSerialPort::readyRead, this, &transceiver::ready_rx );
 }
 
-std::shared_ptr< state_radio_t > transceiver::get_state()
-{ return p_state; }
+void transceiver::ready_rx()
+{ _ready_rx = true; }
+
+transceiver::ext_state_t transceiver::get_state()
+{ return radio_ext_state; }
 
 void transceiver::loop()
 {
-  while( !_stop_loop )
+  while( true )
   {
-    std::cout << "looping\n";
-
-    // Make sure port created
-    if( !p_port )
-    { 
-      std::cout << "Error 1\n";
-      continue; 
-    }
-
-    // Make sure configured
-    if( !p_state->configured ) 
-    { continue; }
-
-    // Make sure port opened
-    if( !p_port->open( QIODeviceBase::ReadWrite ) )
-    { 
-      _error = true; 
-      std::cout << p_port->error();
-      std::cout << "Error 2\n";
-      return; 
-    }
-
-    p_state->opened   = true;
-    p_state->running  = true;
-    emit state_changed( p_state );
-
-    while( !_qerror & !_stop_loop )
+    switch( radio_state )
     {
-      //std::cout << "Loop 2\n";
-      if( p_timer_rx->run() ) 
-      { 
-        std::cout << "Loop RX\n";
-        p_rcvr->get_messages(); 
-      }
+      case STATE_LOOP_CREATE : 
+        qDebug() << "Create\n";
+        if( p_port )
+        { 
+          radio_ext_state.created = true;
+          emit state_changed( radio_ext_state );
+          radio_state = STATE_LOOP_CONFIGURE; 
+        }
+        break;
 
-      //if( p_timer_tx->run() )
-      //{ p_transmitter->run(); }
+      case STATE_LOOP_CONFIGURE : 
+        qDebug() << "Configure\n";
+        if( radio_ext_state.configured )
+        { 
+          qDebug() << "Read Buffer Size: " << p_port->readBufferSize() << "\n";
+          radio_state = STATE_LOOP_OPEN; 
+        }
+        break;
 
-      _qerror = p_port->error();
-    }
+      case STATE_LOOP_OPEN : 
+        qDebug() << "Open\n";
+        if( !p_port->open( QIODeviceBase::ReadWrite ) )
+        { 
+          radio_ext_state.opened = false;
+          emit sig_error( p_port->error() );
+          reset();
+          return;
+        }
+        else
+        { 
+          radio_ext_state.opened = true;
+          emit state_changed( radio_ext_state );
+          radio_state  = STATE_LOOP_RUN; 
+        }
+        break;
 
-    std::cout << "Stopped\n";
-    p_state->running  = false;
-    emit state_changed( p_state );
+      case STATE_LOOP_RUN :
+
+        radio_ext_state.running = true;
+        emit state_changed( radio_ext_state );
+
+        while( !_qerror & !(radio_ext_state.stop) )
+        {
+          if( p_timer_rx->run() ) 
+          { 
+            std::cout << "Loop RX\n";
+            p_port->waitForReadyRead();
+            p_rcvr->get_messages(); 
+          }
+
+          //if( p_timer_tx->run() )
+          //{ p_transmitter->run(); }
+
+          _qerror = p_port->error();
+        }
+        
+        if( _qerror )
+        { emit sig_error( p_port->error() ); }
+        reset();
+        radio_ext_state.configured  = false;
+        radio_ext_state.opened      = false;
+        radio_ext_state.running     = false;
+        emit state_changed( radio_ext_state );
+        return;
+
+      default :
+        qDebug() << "State default" << radio_state << "\n";
+        break;
+    } // end switch
+
   }
 }
-
+      
 // Slots
 // =======================
 
@@ -88,13 +115,42 @@ void transceiver::configure( std::shared_ptr< serial_config_t > p_config )
   p_port->setFlowControl( p_config->flow_control );
   p_port->setParity(      p_config->parity );
   p_port->setStopBits(    p_config->stop_bits );
+  p_port->setReadBufferSize( 20*sizeof(mavlink_message_t) );
 
-  p_state->configured = true;
-  emit state_changed( p_state );
+  radio_ext_state.configured = true;
+  emit state_changed( radio_ext_state );
 }
 
 void transceiver::start()
-{ _stop_loop = false; } 
+{ 
+  radio_ext_state.stop  = false; 
+  emit state_changed( radio_ext_state );
+  radio_state           = STATE_LOOP_CREATE;
+} 
 
 void transceiver::stop()
-{ _stop_loop = true; }
+{ 
+  radio_ext_state.stop = true; 
+  emit state_changed( radio_ext_state );
+} 
+
+// Private
+// =======================
+
+void transceiver::reset()
+{
+  p_port->close();
+  radio_state = STATE_LOOP_CREATE;
+  _qerror     = QSerialPort::NoError;
+}
+
+void transceiver::ext_state_reset()
+{
+  radio_ext_state.created     = false;
+  radio_ext_state.configured  = false;
+  radio_ext_state.opened      = false;
+  radio_ext_state.running     = false;
+  radio_ext_state.stop        = false;
+} 
+  
+

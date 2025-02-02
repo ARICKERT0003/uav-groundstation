@@ -8,3 +8,4 @@ QTabBar::tab:selected {
   color: #363636; 
   background-color: #B4AB62;
 }
+

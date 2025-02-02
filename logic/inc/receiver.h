@@ -19,7 +19,7 @@
 #include <QSerialPort>
 
 //#include <spdlog/spdlog.h>
-//#include <mavlink/common/mavlink.h>
+#include <mavlink.h>
 
 //#include "SerialConnection.h"
 //#include "MessageHandler.h"

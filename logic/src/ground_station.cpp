@@ -7,7 +7,7 @@ ground_station::ground_station()
 {
   // Make Components
   p_radio       = std::make_shared< transceiver >();
-  p_radio_state = p_radio->get_state();
+  radio_state   = p_radio->get_state();
 
   // Radio
   p_thread_radio = std::make_unique< thread_radio >( p_radio );
@@ -21,12 +21,20 @@ ground_station::ground_station()
 }
 
 bool ground_station::is_radio_running()
-{ return p_radio_state->running; }
+{ return radio_state.running; }
 
-void ground_station::set_state_change( std::shared_ptr< state_radio_t > p_state )
+void ground_station::set_state_change( transceiver::ext_state_t state )
 { 
   std::cout << "State Change\n";
-  p_radio_state = p_state; 
+  radio_state = state; 
+
+  emit sig_radio_state_change( state );
+
+  if( !p_thread_radio->isRunning() )
+  {
+    p_thread_radio->quit();
+    p_thread_radio->wait();
+  }
 }
 
 void ground_station::set_radio_config( std::shared_ptr< serial_config_t > p_config )
@@ -54,6 +62,4 @@ void ground_station::radio_stop()
   //while( p_radio_state->running )
   //{ std::cout << "Stopping\n"; } // block
 
-  //_thread_radio.quit();
-  //_thread_radio.wait();
 }

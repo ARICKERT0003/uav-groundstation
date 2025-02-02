@@ -13,6 +13,7 @@
 #include <QGridLayout>
 #include <QDebug>
 
+//#include <status_indicator.h>
 #include <serial_port_config.h>
 #include <ground_station.h>
 
@@ -35,6 +36,7 @@ class serial_config_box : public QGroupBox
     void set_stop_bits();
 
     void sanitize();          // On Apply Button
+    void radio_state_change( transceiver::ext_state_t state );
     void on_start_stop_btn();
 
   signals :
@@ -45,23 +47,24 @@ class serial_config_box : public QGroupBox
     std::shared_ptr< ground_station >   p_gs;
 
     // UI 
-    QLabel*       p_port_label              = nullptr;
-    QComboBox*    p_port_combo_box          = nullptr;
-    QLabel*       p_baud_label              = nullptr;
-    QComboBox*    p_baud_combo_box          = nullptr;
-    QLabel*       p_direction_label         = nullptr;
-    QComboBox*    p_direction_combo_box     = nullptr;
-    QLabel*       p_data_bits_label         = nullptr;
-    QComboBox*    p_data_bits_combo_box     = nullptr;
-    QLabel*       p_flow_control_label      = nullptr;
-    QComboBox*    p_flow_control_combo_box  = nullptr;
-    QLabel*       p_parity_label            = nullptr;
-    QComboBox*    p_parity_combo_box        = nullptr;
-    QLabel*       p_stop_bits_label         = nullptr;
-    QComboBox*    p_stop_bits_combo_box     = nullptr;
-    QLabel*       p_status_indicator        = nullptr;
-    QPushButton*  p_apply_btn               = nullptr;
-    QPushButton*  p_start_stop_btn          = nullptr;
+    QLabel*       p_status_label        = nullptr;
+    QLabel*       p_port_label          = nullptr;
+    QComboBox*    p_port_cb             = nullptr;
+    QLabel*       p_baud_label          = nullptr;
+    QComboBox*    p_baud_cb             = nullptr;
+    QLabel*       p_direction_label     = nullptr;
+    QComboBox*    p_direction_cb        = nullptr;
+    QLabel*       p_data_bits_label     = nullptr;
+    QComboBox*    p_data_bits_cb        = nullptr;
+    QLabel*       p_flow_control_label  = nullptr;
+    QComboBox*    p_flow_control_cb     = nullptr;
+    QLabel*       p_parity_label        = nullptr;
+    QComboBox*    p_parity_cb           = nullptr;
+    QLabel*       p_stop_bits_label     = nullptr;
+    QComboBox*    p_stop_bits_cb        = nullptr;
+    QLabel*       p_status_indicator    = nullptr;
+    QPushButton*  p_apply_btn           = nullptr;
+    QPushButton*  p_start_stop_btn      = nullptr;
 };
 
 #endif
