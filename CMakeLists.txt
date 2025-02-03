@@ -87,13 +87,9 @@ set( LOGIC_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/logic )
 set( UI_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/ui )
 
 # Base Compiler Flags
-set(UAVGS_COMPILE_FLAGS " -Wall -Wextra -Werror -W -DDEBUG -g" )
+#set(UAVGS_COMPILE_FLAGS " -Wall -Wextra -Werror -W -DDEBUG -g" )
 
-set(UAVGS_RELEASE_FLAGS
-  "-pedantic"
-  "-03"
-  "-Wno-address-of-packed-member"
-)
+#set(UAVGS_RELEASE_FLAGS " -pedantic -03 -Wno-address-of-packed-member" )
 
 #############################
 # Set Files and Directories
@@ -112,6 +108,7 @@ set(SRC_FILES
   ${UI_DIR}/src/tab_3.cpp
   ${UI_DIR}/src/serial_config_box.cpp
   ${UI_DIR}/src/sql_config_box.cpp
+  ${UI_DIR}/src/telem_tbl.cpp
 )
 
 # Header Files
@@ -127,6 +124,7 @@ set(HEADER_FILES
   ${UI_DIR}/inc/tab_3.h
   ${UI_DIR}/inc/serial_config_box.h
   ${UI_DIR}/inc/sql_config_box.h
+  ${UI_DIR}/inc/telem_tbl.h
 )
 
 # Include Directory
@@ -169,19 +167,14 @@ STRING( APPEND UAVGS_COMPILE_FLAGS
 
 qt_add_executable( ${APP_NAME} ${SRC_FILES} ${HEADER_FILES} )
 
-#qt_add_qml_module( ${APP_NAME} 
-#  URI hello
-#  QML_FILES src/qml/main.qml
-#)
-
-# Make Library Binary
-#add_library( ${LIBRARY_NAME} ${LINK_TYPE} ${SRC_FILES} )
-#
 # Set Library Properties
-set_target_properties( ${APP_NAME} PROPERTIES
-  VERSION ${PROJECT_VERSION}
-  COMPILE_FLAGS ${UAVGS_COMPILE_FLAGS}
-)
+if( CMAKE_COMPILER_IS_GNUCXX )
+  set_target_properties( ${APP_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    COMPILE_FLAGS ${UAVGS_COMPILE_FLAGS}
+  )
+endif( CMAKE_COMPILER_IS_GNUCXX )
+
 get_target_property( CHECK ${APP_NAME} COMPILE_FLAGS )
 MESSAGE( "COMPILE FLAGS: " ${CHECK} )
   #  PUBLIC_HEADER "${HEADER_FILES}"

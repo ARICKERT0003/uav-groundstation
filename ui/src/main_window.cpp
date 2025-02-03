@@ -25,11 +25,16 @@ main_window::main_window( QWidget* parent )
   p_tab1->setLayout( layout_t1 );
 
   // [Main Widget]->[Tab 2]
-  p_tab1 = std::make_shared< tab_2 >();
+  p_tab2 = std::make_shared< tab_2 >();
   p_main_widget->addTab( p_tab2.get(), tr("Telemetry/Status") );
 
+  p_telem_tbl = std::make_unique< telem_tbl >();
 
-  p_main_widget->addTab( new tab_3(), tr("Tab 3") );
+  QGridLayout* layout_t2 = new QGridLayout;
+  layout_t2->addWidget( p_telem_tbl.get(), 0, 0 );
+  p_tab2->setLayout( layout_t2 );
+
+  //p_main_widget->addTab( new tab_3(), tr("Tab 3") );
 
   QVBoxLayout* main_layout = new QVBoxLayout;
   main_layout->addWidget( p_main_widget.get() );

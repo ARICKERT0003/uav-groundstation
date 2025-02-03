@@ -1,5 +1,5 @@
-#ifndef TELEMETRY_STATUS_H
-#define TELEMETRY_STATUS_H
+#ifndef TELEM_TBL_H
+#define TELEM_TBL_H
 
 #include <iostream>
 #include <memory>
@@ -14,12 +14,16 @@
 
 #include <ground_station.h>
 
-class telemetry_status : public QWidget
+class telem_tbl : public QWidget
 {
   Q_OBJECT
+  
+  public :
+  explicit telem_tbl( QWidget* parent = nullptr );
 
+  private :
   std::shared_ptr< QSqlTableModel > p_model;
   std::shared_ptr< QTableView >     p_view;
-}
+};
 
 #endif

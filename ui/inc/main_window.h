@@ -10,8 +10,11 @@
 
 #include <tab_1.h>
 #include <sql_config_box.h>
+
 #include <tab_2.h>
-#include <tab_3.h>
+#include <telem_tbl.h>
+
+//#include <tab_3.h>
 
 #include "ground_station.h"
 
@@ -35,6 +38,7 @@ class main_window : public QDialog
     std::shared_ptr< sql_config_box >     p_sql_config_box;
     
     std::shared_ptr< tab_2 >              p_tab2;
+    std::unique_ptr< telem_tbl >          p_telem_tbl;
 };
 
 
