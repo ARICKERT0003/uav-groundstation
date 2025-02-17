@@ -1,8 +1,5 @@
 #include <ground_station.h>
 
-
-// Need to switch to eventloop thread structure bc loop() is never returning thus stoppping the flow ofevent being passed
-
 ground_station::ground_station()
 {
   // Make Components
@@ -12,7 +9,7 @@ ground_station::ground_station()
   // Radio
   p_thread_radio = std::make_unique< thread_radio >( p_radio );
   p_radio->p_port->moveToThread( p_thread_radio.get() );
-  //p_radio->moveToThread( &_thread_radio );
+
   connect( this, &ground_station::sig_radio_config, p_radio.get(), &transceiver::configure ); 
   connect( this, &ground_station::sig_radio_start, p_radio.get(), &transceiver::start ); 
   connect( this, &ground_station::sig_radio_stop, p_radio.get(), &transceiver::stop ); 
